@@ -9,100 +9,157 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Lab: Class One Survey Analysis
+## HW3: Class 1 Survey Analysis
 
-### INSTRUCTIONS
-
-Complete all tasks 1-7 using [**reproducible coding practices**]{.underline} (annotation of all code). Use R syntax to solve all problems (i.e. do not manually change values/variables in datasets or check them manually to make sure things are correct except as a double or triple check). Please cut and paste each problem before each R markdown chunk and annotate your code within the chunks. Compare and consolidate your answers. Select one member of your group to walk the class through how each problem was solved. Elect one member of your group to turn in your consolidated code with answers.
-
-#### 1. Import class one survey data from our Github site (<https://github.com/kijohnson/ADA-2024>) (The dataset is called ‘Class 1 Survey Fall 2024_di.csv’), calling the R dataframe that you create C1survey.
-
+### 0. Preparation
 ```{r}
-class_survey_csv <-
- read_csv(
-   "https://raw.githubusercontent.com/kijohnson/ADA-2024/main/Class%201%20(Getting%20started%20and%20RR%20I)/Lab/Class%201%20Survey%20Fall%202024_di.csv"
-   )
+# Install required packages if these are not installed
+  # install.packages("haven") 
+  # install.packages("readr") 
+  # install.packages("dplyr")
+  # install.packages("openxlsx")
+  # install.packages("pacman")
+
+# for SPSS (read_sav()), stata (read_dta()), SAS(read_sas()) and xpt (read_xpt()) files
+library(haven) 
+
+# for reading csv file (read_csv())
+library(readr) 
+
+# for data management
+library(dplyr) 
+
+# for exporting excel files
+library(openxlsx) 
+
+# we can also use the pacman package that automatically checks for packages, installs them if not found, and opens the associated library once installed
+pacman::p_load(haven, readr, dplyr, openxlsx)
 ```
 
-#### 2. Determine: a. the number of observations (i.e. the number of people who filled out the survey) and b. the number of variables in the dataframe.
+### 1. Import class one survey data from our Github site (<https://github.com/kijohnson/ADA-2024>) (The dataset is called ‘Class 1 Survey Fall 2024_di.csv’), calling the R dataframe that you create C1survey.
 
 ```{r}
+# Read the C1 dataset from Github
+class_survey_csv <- read_csv("https://raw.githubusercontent.com/kijohnson/ADA-2024/main/Class%201%20(Getting%20started%20and%20RR%20I)/Lab/Class%201%20Survey%20Fall%202024_di.csv")
+```
+
+### 2. Determine: a. the number of observations (i.e. the number of people who filled out the survey) and b. the number of variables in the dataframe.
+
+```{r}
+# 29 observations and 27 variables are included in the dataset.
 dim(class_survey_csv)
+str(class_survey_csv)
 ```
 
-#### 3. a. Rename the column variables to something shorter and that is descriptive of what the variable is about (for example like_dogs for the ‘Do you like dogs?’ question variable) and b. Display that they are renamed.
-
-##### Point to remember about renaming variables
+### 3. a. Rename the column variables to something shorter and that is descriptive of what the variable is about (for example like_dogs for the ‘Do you like dogs?’ question variable) and b. Display that they are renamed.
 
 ```{r}
+# Display the current column names (variable names)
 colnames(class_survey_csv)
 ```
 
 ```{r}
-# rename variables in order of appearance
+# Rename variables in order of appearance
 names(class_survey_csv)[1:27]<-c("id", "like_cats", "like_dogs", "have_desert", "slogan",
 "fav_day", "larkORowl", "fav_food", "fav_drink", "fav_season", "fav_month", "hobby",
 "program", "specialization", "stat_software", "R_exp", "coding_comfort", "coding_length",
 "top_three","public_health_interest", "fav_num", "bday", "bmonth", "country", "state",
 "city", "highest_educ_level")
+
+# Display the renamed variables (columns)
+colnames(class_survey_csv)
 ```
 
-#### 4. Write code to determine and display the number of factor, integer, numerical, and character variables there are in the C1survey dataset.
+### 4. Write code to determine and display the number of factor, integer, numerical, and character variables there are in the C1survey dataset.
 
 ```{r}
-sapply(class_survey_csv, class)
-str(class_survey_csv)
-summary(class_survey_csv)
+sapply(class_survey_csv, class) # Solution 1 using sapply function
+str(class_survey_csv) # Solution 2 using str function
+table(sapply(class_survey_csv, class)) # Solution 3 is the best solution using table and sapply functions 23 character and 4 integer
+summary(class_survey_csv) # Solution 4
 ```
 
-#### 5. a. Using code, check the bday and bmonth variables for any unusual or missing values. If you find any, b. describe what you will do with the unusual values in a comment before or immediately following the code that does it, and c. after you have cleaned up any unusual values, find the median bday and month. \*Note: please make sure that your bday and month variables are numeric before doing statistics
+### 5. a. Using code, check the bday and bmonth variables for any unusual or missing values. If you find any, b. describe what you will do with the unusual values in a comment before or immediately following the code that does it, and c. after you have cleaned up any unusual values, find the median bday and month. \*Note: please make sure that your bday and month variables are numeric before doing statistics
 
 ```{r}
-## Prep (Character -> Numeric)
-# first check class again
-class(class_survey_csv$bday)
-class(class_survey_csv$bmonth)
+# a.  Check the bday and bmonth varaibles
+  ## Check the classes again
+  class(class_survey_csv$bday)
+  class(class_survey_csv$bmonth)
 
-# check missing/unusual values
-class_survey_csv$bday
-class_survey_csv$bmonth
+  ## Look at values to check missing/unusual values in bday and bmonth varriables
+  class_survey_csv$bday
+  class_survey_csv$bmonth
 
-# data cleaning
+# b. Data cleaning
+  ## Cleaning bday variable
+  class(class_survey_csv$bday) # check that it is coded as character class
+  class_survey_csv$bday<-ifelse(class_survey_csv$bday == "May 21-report 21", "21", class_survey_csv$bday)
+  class_survey_csv$bday<-ifelse(class_survey_csv$bday == "March 31st", "31", class_survey_csv$bday)
+  class_survey_csv$bday # check values 
 
+  ## Cleaning bmonth variable
+  class(class_survey_csv$bmonth)
+  class_survey_csv$bmonth[class_survey_csv$bmonth=="May 21-report 5"]<-"5"
+  class_survey_csv$bmonth[class_survey_csv$bmonth=="February"]<-"2"
+  class_survey_csv$bmonth[class_survey_csv$bmonth=="September"]<-"9"
+  class_survey_csv$bmonth[class_survey_csv$bmonth=="July"]<-"7"
+  class_survey_csv$bmonth[class_survey_csv$bmonth=="March"]<-"3"
+  class_survey_csv$bmonth # check values 
 
-# convert bday variable to numeric using the as.numeric function for stats
-class_survey_csv$bday_n <-as.numeric(class_survey_csv$bday)
-class_survey_csv$bmonth_n <-as.numeric(class_survey_csv$bmonth)
+  ## Convert the bday and bmonth variables into numeric
+    ### Convert bday variable  
+    class_survey_csv$bday<-as.numeric(class_survey_csv$bday)
+    table(class_survey_csv$bday, useNA = "always") # check values 
+  
+    ### Convert bmonth variable
+    class_survey_csv$bmonth<-as.numeric(class_survey_csv$bmonth)
+    table(class_survey_csv$bmonth, useNA = "always") # check values 
+    
+    ### Check the classes of bday and bmonth variables
+    class(class_survey_csv$bday)
+    class(class_survey_csv$bmonth)
 
-# check the class of the new numeric bday and bmonth variable
-class(class_survey_csv$bday_n)
-class(class_survey_csv$bmonth_n)
-
-## Steps
-# get summary stats; the missing values (NA's)
-summary(class_survey_csv$bday_n)
-summary(class_survey_csv$bmonth_n)
-table(class_survey_csv$bday_n, useNA = "always")
-table(class_survey_csv$bday_n, useNA = "always")
+# c. Calculate medians for bday and bmonth 
+median(class_survey_csv$bday, na.rm=TRUE) # 14 (biased because of 0, which is not a value) How could we better design a survey to ensure this doesn't happen?
+median(class_survey_csv$bmonth, na.rm=TRUE) # 7
 ```
 
-#### 6. a.Create a new variable called bseason that gives the season according to Northern Meteorological season in which respondents were born (winter = 12/1 to 2/29, spring = 3/1 to 5/31, summer = 6/1 to 8/31, fall = 9/1 to 11/30). b. Using the table function, print a table of Seasons in the columns and bmonths in the rows that allows you to check that the coding is correct c. Sum the columns using the addmargins function to answer the question of how many classmates were born in each season? Include your answer in the code.
+### 6. a.Create a new variable called bseason that gives the season according to Northern Meteorological season in which respondents were born (winter = 12/1 to 2/29, spring = 3/1 to 5/31, summer = 6/1 to 8/31, fall = 9/1 to 11/30). b. Using the table function, print a table of Seasons in the columns and bmonths in the rows that allows you to check that the coding is correct c. Sum the columns using the addmargins function to answer the question of how many classmates were born in each season? Include your answer in the code.
 
 ```{r}
-##Step a. Create a new variable: bseason
-class_survey_csv <- class_survey_csv %>%
- mutate(bseason = case_when(bmonth %in% c(12,1,2) ~ "Winter",
-                            bmonth %in% c(3,4,5) ~ "Spring",
-                            bmonth %in% c(6,7,8) ~ "Summer",
-                            bmonth %in% c(9,10,11) ~ "Fall"))
-class_survey_csv$bseason
+# a. Create a new variable: bseason (using dplyr)
+class_survey_csv <- class_survey_csv %>% 
+  mutate(bseason=case_when(bmonth %in% c(12,1,2) ~"Winter",
+                           bmonth %in% c(3,4,5) ~"Spring",
+                           bmonth %in% c(6,7,8) ~"Summer",
+                           bmonth %in% c(9,10,11) ~"Fall"))
+table(class_survey_csv$bmonth, class_survey_csv$bseason) # check variable
 
-##Step b. Print a table of seasons
+class_survey_csv$bseason_f<-factor(class_survey_csv$bseason, levels=c("Winter", "Spring", "Summer", "Fall"))
 
+# b. Print a table of seasons
+table(class_survey_csv$bmonth, class_survey_csv$bseason)
+table(class_survey_csv$bmonth, class_survey_csv$bseason_f)
 
-##Step c. Sum the columns
+# c. Sum the columns
+tab<-addmargins(table(class_survey_csv$bmonth, class_survey_csv$bseason, useNA = "always"), 1)
+tab
+tab<-addmargins(table(class_survey_csv$bmonth, class_survey_csv$bseason_f, useNA = "always"), 1)
+tab
+
+# Results: Births by season: Fall = 4 Winter = 9 Spring = 8 Summer = 8
 ```
 
 
-#### 7. Pick your favorite variable or variables to analyze, come up with a question you want to answer with that variable or variables, generate the code, and provide an answer to your question. Describe what you did using comments (i.e. #’s).
+### 7. Pick your favorite variable or variables to analyze, come up with a question you want to answer with that variable or variables, generate the code, and provide an answer to your question. Describe what you did using comments (i.e. #’s).
+```{r}
+# Step 1. Define a question: Which statistical software is mostly preferred among the students in class?
+
+# Step 2. Check the distribution of "stat_software" variable
+table(class_survey_csv$stat_software)
+
+# Results: Among 29 students, SPSS was the most preferred software among the students (n=10), followed by R (n=8), Excel (n=5), Stata (n=4), and SAS (n=1). One response indicating a preference for both R and SPSS was excluded.
+```
+
 
