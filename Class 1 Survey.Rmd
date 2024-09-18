@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## HW3: Class 1 Survey Analysis
 
 ### 0. Preparation
+
 ```{r}
 # Install required packages if these are not installed
   # install.packages("haven") 
@@ -151,8 +152,8 @@ tab
 # Results: Births by season: Fall = 4 Winter = 9 Spring = 8 Summer = 8
 ```
 
-
 ### 7. Pick your favorite variable or variables to analyze, come up with a question you want to answer with that variable or variables, generate the code, and provide an answer to your question. Describe what you did using comments (i.e. #’s).
+
 ```{r}
 # Step 1. Define a question: Which statistical software is mostly preferred among the students in class?
 
@@ -161,5 +162,3 @@ table(class_survey_csv$stat_software)
 
 # Results: Among 29 students, SPSS was the most preferred software among the students (n=10), followed by R (n=8), Excel (n=5), Stata (n=4), and SAS (n=1). One response indicating a preference for both R and SPSS was excluded.
 ```
-
-
