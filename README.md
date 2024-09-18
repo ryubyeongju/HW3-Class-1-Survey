@@ -1,5 +1,6 @@
 # ReadMe
-Title: HW3: Class 1 Survey Analysis
+Title: HW3 Class 1 Survey Analysis
+
 Author: Byeongju Ryu
 
 1. What the project does?
